@@ -63,7 +63,7 @@ jobs:
            
       - name: Deploy new Elastic-Beanstalk application version
         run: |
-          aws elasticbeanstalk update-environment --enviroment-name="${{ env.EB_environment_name }}" \
+          aws elasticbeanstalk update-environment --environment-name="${{ env.EB_environment_name }}" \
           --version-label "Version_${{ github.sha }}"
       
       - name: print msq
