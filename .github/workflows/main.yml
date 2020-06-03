@@ -1,0 +1,42 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CICD-Pipeline-Flask-To-Aws-Elastic-Beanstalk
+env:
+  EB_package_S3_bucket_name: "git-test-application-flask-packages"
+  EB_application_name      : "MyFlask"
+  EB_envyroment_name       : "Myflask-env"
+  Deploy_package_name      : "Flask_app_${{ github.sha }}.zip"
+  AWS_region_name          : "eu-central-1"
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: 
+      - master
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  ci_part:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Git clone repo
+        uses: actions/checkout@v1
+      
+      - name: Create zip deployment package
+        run : zip -r ${{ env.Deploy_package_name }} ./ -x *.git*
+      
+      - name: config aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id    : ${{ secrets.CICD_FLASK_PYTHON_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CICD_FLASK_PYTHON_SECRET_ACCESS_KEY }}
+          aws-region           : ${{ env.AWS_region_name }}
+
+      
+      - name: Upload deployment package to S3 bucket
+        run : aws s3 cp ${{ env.Deploy_package_name }} s3://${{ env.EB_package_S3_bucket_name }}
+        
+      - name: print msq
+        run : echo "CI Pipeline finished. Congrats:*"
